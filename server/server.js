@@ -3,13 +3,15 @@ const path = require('path');
 const db = require('./config/connection');
 const { ApolloServer } = require('apollo-server-express');
 const { typeDefs, resolvers } = require('./schemas');
-const { Mongoose } = require('mongoose');
+// const mongoose = require('mongoose');
+const { authMiddleware } = require('./utils/auth');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: authMiddleware,
 })
 
 app.use(express.urlencoded({ extended: false }));
@@ -20,13 +22,15 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));
 }
 
-Mongoose.connect(
-  process.env.MONGODB_URI || 'mongo://localhost:27017/bookData',
-  {
-    useNewUrlParse: true,
-    useUnifiedTopology: true,
-  },
-)
+// server.applyMiddleware({ app });
+
+// mongoose.connect(
+//   process.env.MONGODB_URI || 'mongo://localhost:27017/bookData',
+//   {
+//     useNewUrlParse: true,
+//     useUnifiedTopology: true,
+//   },
+// )
 
 const startApolloServer = async (typeDefs, resolvers) => {
   await server.start();
